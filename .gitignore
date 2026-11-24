@@ -1,0 +1,9 @@
+# Bỏ qua dữ liệu nặng và kết quả chạy khi đẩy lên GitHub
+data/raw/
+data/processed/
+outputs/
+venv/
+.venv/
+__pycache__/
+*.pyc
+build/
