@@ -2,7 +2,7 @@
 
 Dự án xây dựng hệ thống **Phát hiện và Nhận diện 73 loại biển báo giao thông đường bộ Việt Nam** (theo Quy chuẩn kỹ thuật quốc gia **QCVN 41:2019/BGTVT**) tích hợp vào kiến trúc **Hệ thống giao thông thông minh (ITS)** và **Hỗ trợ người lái nâng cao (ADAS)**.
 
-Hệ thống kết hợp quy trình tiền xử lý ảnh ngoài trời (**CLAHE + Lọc song phương Bilateral**), tăng cường dữ liệu mô phỏng thời tiết khắc nghiệt, huấn luyện mô hình học sâu gọn nhẹ (**YOLOv8n**), chuẩn hóa trọng số sang định dạng trung gian **ONNX (`opset 18`)**, nhánh thực thi tốc độ cao bằng **C++ (OpenCV DNN)** và giao diện **Dashboard Python (Streamlit)** cảnh báo tiếng Việt thời gian thực.
+Hệ thống kết hợp quy trình tiền xử lý ảnh ngoài trời (**CLAHE + Lọc song phương Bilateral**), tăng cường dữ liệu mô phỏng 6 điều kiện thời tiết/camera, huấn luyện mô hình học sâu gọn nhẹ (**YOLOv8n**), chuẩn hóa trọng số sang định dạng trung gian **ONNX (`opset 18`)**, nhánh thực thi tốc độ cao bằng **C++ (OpenCV DNN)** và giao diện **Dashboard Python (Streamlit)** cảnh báo tiếng Việt thời gian thực.
 
 ## 1. Kết Quả Thực Nghiệm Chính
 
@@ -24,46 +24,57 @@ Hệ thống kết hợp quy trình tiền xử lý ảnh ngoài trời (**CLAHE
 | Python – OpenCV DNN (`best.onnx`) | 10,0 | 9,8 | 7,52 / 90,13 / 2,05 | 99,71 / 166,61 / 207,29 | Đạt mức TB |
 | Python – ONNX Runtime (`best.onnx`) | 5,5 | 5,4 | 12,59 / 165,74 / 3,13 | 181,52 / 366,99 / 430,65 | Chưa đạt |
 
-## 2. Cấu Trúc Thư Mục Dự Án (Modular Architecture)
+## 2. Cấu Trúc Thư Mục Dự Án (`traffic_sign_its_Group_v3/`)
 
 ```text
 traffic_sign_its_Group_v3/
-├── configs/                           # Quản lý cấu hình tập trung (YAML)
-│   ├── dataset.yaml                   # Đường dẫn dữ liệu & danh sách 73 lớp biển báo VN
-│   ├── train_config.yaml              # Siêu tham số huấn luyện (epochs, batch, lr, fliplr=0.0)
-│   └── its_runtime.yaml               # Cấu hình runtime dùng chung cho nhánh C++ và Python
-├── data/                              # Thư mục dữ liệu (raw/, processed/, README_data.md)
-├── notebooks/                         # Sổ tay huấn luyện GPU trên Google Colab
-│   └── train_yolov8.ipynb
-├── src/                               # Mã nguồn lõi Python chia theo nhiệm vụ độc lập
-│   ├── data_pipeline/                 # Tiền xử lý CLAHE + Bilateral & tăng cường 6 hiệu ứng thời tiết
-│   ├── models/                        # Khởi tạo YOLOv8n (detector.py) & xuất ONNX (exporter.py)
-│   ├── training/                      # Quy trình huấn luyện tự động (train.py)
-│   ├── evaluation/                    # Tính mAP/F1 (metrics.py) & đo tốc độ ONNX (benchmark_its.py)
-│   ├── inference/                     # Suy luận Multi-Scale (predictor.py) & cảnh báo QCVN (alert_manager.py)
-│   └── utils/                         # Tiện ích dùng chung, letterbox, export_labels.py
-├── cpp_inference/                     # Nhánh suy luận tốc độ cao C++ (OpenCV DNN + CMake)
-│   ├── include/                       # detector.hpp, alert.hpp, its_config.hpp, its_utils.hpp
-│   ├── src/                           # main.cpp, detector.cpp, alert.cpp, benchmark.cpp, its_config.cpp
-│   ├── CMakeLists.txt
-│   └── README.md
-├── scripts/                           # Các kịch bản chạy lệnh CLI nhanh
-│   ├── train.py                       # Khởi chạy huấn luyện
-│   ├── evaluate.py                    # Xuất bảng độ chính xác (mAP, F1) & đo tốc độ ONNX
-│   ├── inference_video.py             # Nhận diện video và xuất file MP4 vào outputs/demo_videos/
-│   ├── benchmark_python.py            # Đo FPS & độ trễ cho 3 backend (pytorch, onnxruntime, opencv)
-│   └── compare_benchmarks.py          # Gộp các tệp benchmark_*.json thành bảng & 2 biểu đồ PNG
-├── app/                               # Giao diện mô phỏng ADAS Dashboard
-│   └── dashboard.py                   # Ứng dụng Streamlit (Ảnh tĩnh, Video hành trình, Webcam)
-├── outputs/                           # Kết quả thực nghiệm & trọng số đồng bộ
-│   ├── checkpoints/                   # best.pt, best.onnx, last.pt, labels.txt (73 lớp)
-│   ├── logs/                          # results.csv, args.yaml, benchmark_*.json, benchmark_summary.md
-│   ├── figures/                       # Biểu đồ PR/F1/Confusion Matrix, pipeline_its.png, fps_comparison.png
-│   └── demo_videos/                   # Lưu video kết quả đầu ra
+├── .gitignore                         # Loại trừ dữ liệu ảnh lớn và môi trường ảo khi đẩy Git
+├── README.md                          # Tài liệu hướng dẫn tổng quan dự án
+├── requirements.txt                   # Danh sách thư viện Python cần thiết
 ├── run_all.py                         # Chạy trọn bộ pipeline xử lý & tăng cường dữ liệu
-├── requirements.txt                   # Danh sách thư viện Python
-└── README.md                          # Tài liệu hướng dẫn dự án
+├── app/
+│   ├── assets/                        # Thư mục lưu tài nguyên giao diện (icon/âm thanh mở rộng)
+│   └── dashboard.py                   # Giao diện ADAS Dashboard (Streamlit: Ảnh, Video, Webcam)
+├── configs/
+│   ├── dataset.yaml                   # Cấu hình đường dẫn dữ liệu & danh sách 73 lớp biển báo VN
+│   ├── its_runtime.yaml               # Tham số runtime dùng chung cho nhánh C++ và Python
+│   └── train_config.yaml              # Siêu tham số huấn luyện (epochs, batch, lr, fliplr=0.0)
+├── cpp_inference/                     # Nhánh suy luận tốc độ cao bằng C++ (OpenCV DNN)
+│   ├── CMakeLists.txt
+│   ├── README.md
+│   ├── include/                       # alert.hpp, detector.hpp, its_config.hpp, its_utils.hpp
+│   └── src/                           # alert.cpp, benchmark.cpp, detector.cpp, its_config.cpp, main.cpp
+├── data/
+│   ├── README_data.md                 # Hướng dẫn tải & chuẩn bị bộ dữ liệu chi tiết
+│   ├── raw/                           # Dữ liệu thô (có sẵn video mẫu demo.mp4)
+│   └── processed/                     # (Trống sẵn — tự động sinh ra khi chạy python run_all.py)
+├── notebooks/
+│   └── train_yolov8.ipynb             # Sổ tay huấn luyện YOLOv8n trên Google Colab GPU
+├── outputs/
+│   ├── checkpoints/                   # best.pt, best.onnx, last.pt, labels.txt (73 lớp)
+│   ├── demo_videos/                   # (Tự động lưu video kết quả khi chạy scripts/inference_video.py)
+│   ├── figures/                       # Biểu đồ PR/F1/Confusion Matrix, pipeline_its.png, fps_comparison.png, latency_breakdown.png
+│   └── logs/                          # benchmark_py_*.json, benchmark_summary.{csv,md} & traffic_sign/ (results.csv, args.yaml)
+├── scripts/
+│   ├── benchmark_python.py            # Đo FPS & độ trễ cho 3 backend (pytorch, onnxruntime, opencv)
+│   ├── compare_benchmarks.py          # Gộp các tệp benchmark_*.json thành bảng & 2 biểu đồ PNG
+│   ├── evaluate.py                    # Xuất bảng độ chính xác (mAP, F1) & đo tốc độ ONNX
+│   ├── inference_video.py             # Nhận diện video và xuất MP4 vào outputs/demo_videos/
+│   └── train.py                       # Khởi chạy huấn luyện mô hình
+├── src/
+│   ├── __init__.py
+│   ├── data_pipeline/                 # import_vn_dataset.py, preprocess.py, augmentation.py, prepare_dataset.py, augment_dataset.py, class_report.py, collect_own.py, visualize.py
+│   ├── evaluation/                    # metrics.py, benchmark_its.py
+│   ├── inference/                     # predictor.py, alert_manager.py
+│   ├── models/                        # detector.py, exporter.py
+│   ├── training/                      # train.py
+│   └── utils/                         # config.py, export_labels.py, logger.py, timer.py, vision.py
+└── tests/                             # Thư mục kiểm thử đơn vị (mở rộng)
 ```
+
+> **Lưu ý về các thư mục trống:**
+> * `data/processed/` không đóng gói sẵn trong kho mã nguồn do dung lượng bộ ảnh lớn (~15.083 ảnh). Để tái tạo, làm theo `data/README_data.md` rồi chạy `python run_all.py`.
+> * `outputs/demo_videos/` sẽ tự động được ghi tệp kết quả (`demo_result.mp4`) khi chạy lệnh `scripts/inference_video.py` bên dưới.
 
 ## 3. Hướng Dẫn Cài Đặt & Chạy Nhanh
 
@@ -82,7 +93,7 @@ streamlit run app/dashboard.py
 ```
 Giao diện tự động bật chuỗi tiền xử lý ngoài trời (**CLAHE + lọc song phương**), hỗ trợ tải ảnh biển báo, video camera hành trình hoặc bật Webcam trực tiếp (kèm tùy chọn chống lật gương *Mirror Flip*).
 
-### Bước 3: Xem báo cáo độ chính xác & Xuất video nhận diện
+### Bước 3: Xem báo cáo độ chính xác & Xuất video nhận diện vào `outputs/demo_videos/`
 ```bash
 # In bảng chỉ số Precision, Recall, F1-Score, mAP và đo tốc độ ONNX
 python scripts/evaluate.py
@@ -99,7 +110,7 @@ python scripts/benchmark_python.py --backend opencv --source data/raw/demo.mp4 -
 python scripts/compare_benchmarks.py
 ```
 
-### Bước 5: Biên dịch và chạy nhánh C++ tốc độ cao (tùy chọn — yêu cầu CMake ≥ 3.12, OpenCV ≥ 4.11)
+### Bước 5: Biên dịch và chạy nhánh C++ tốc độ cao (yêu cầu CMake ≥ 3.12, OpenCV ≥ 4.11)
 ```bash
 python -m src.utils.export_labels --dataset configs/dataset.yaml --out outputs/checkpoints/labels.txt
 cmake -S cpp_inference -B cpp_inference/build -DCMAKE_BUILD_TYPE=Release
