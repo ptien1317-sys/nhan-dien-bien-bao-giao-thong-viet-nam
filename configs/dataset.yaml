@@ -1,0 +1,125 @@
+path: data/processed
+train: train/images
+val: val/images
+test: test/images
+raw:
+  gtsrb: data/raw/gtsrb
+  custom: data/raw/vietnam
+  own: data/raw/own
+gtsrb_merge:
+  enabled: false
+  max_per_class: 150
+  map:
+    17: P-102
+    9: P-125
+    0: P-127
+    1: P-127
+    2: P-127
+    3: P-127
+    4: P-127
+    5: P-127
+    7: P-127
+    8: P-127
+    27: W-224
+    28: W-225
+    25: W-227
+    40: R-303
+split:
+  train: 0.7
+  val: 0.15
+  test: 0.15
+  seed: 42
+  group_by_track: true
+  mode: keep
+  custom_group_by: roboflow
+preprocess:
+  clahe: true
+  clahe_clip_limit: 2.0
+  clahe_tile_grid: 8
+  denoise: bilateral
+  max_side: 0
+augmentation:
+  copies_per_image: 1
+  seed: 42
+  prob:
+    rain: 0.3
+    fog: 0.3
+    motion_blur: 0.3
+    low_light: 0.25
+    glare: 0.15
+    noise: 0.2
+nc: 73
+names:
+  0: DP-135
+  1: P-102
+  2: P-103a
+  3: P-103b
+  4: P-103c
+  5: P-104
+  6: P-106a
+  7: P-106b
+  8: P-107
+  9: P-107a
+  10: P-111
+  11: P-112
+  12: P-115
+  13: P-117
+  14: P-123a
+  15: P-123b
+  16: P-124a
+  17: P-124b
+  18: P-124c
+  19: P-125
+  20: P-127
+  21: P-128
+  22: P-130
+  23: P-131a
+  24: P-137
+  25: P-245a
+  26: P105
+  27: R-301c
+  28: R-301d
+  29: R-301e
+  30: R-302a
+  31: R-302b
+  32: R-303
+  33: R-305
+  34: R-401
+  35: R-402
+  36: R-403
+  37: R-407a
+  38: R-409
+  39: R-411
+  40: R-412b
+  41: R-423
+  42: R-425
+  43: R-434
+  44: S-509a
+  45: W-201a
+  46: W-201b
+  47: W-202a
+  48: W-202b
+  49: W-203b
+  50: W-203c
+  51: W-205a
+  52: W-205b
+  53: W-205d
+  54: W-207
+  55: W-207a
+  56: W-207b
+  57: W-207c
+  58: W-208
+  59: W-209
+  60: W-210
+  61: W-219
+  62: W-221b
+  63: W-224
+  64: W-225
+  65: W-226
+  66: W-227
+  67: W-233
+  68: W-235
+  69: W-245a
+  70: W208
+  71: chi_dan_khac
+  72: cho

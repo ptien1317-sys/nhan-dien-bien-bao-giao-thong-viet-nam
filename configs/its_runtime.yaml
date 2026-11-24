@@ -1,0 +1,39 @@
+# =====================================================================
+# its_runtime.yaml - Tham so thoi gian chay (runtime) cua he thong ITS
+# Dung chung cho nhanh C++ (cpp_inference/) va nhanh Python (src/utils, scripts/).
+# Luu y: chay chuong trinh tu thu muc goc traffic_sign_its/ de cac duong dan tuong doi dung.
+# Gia tri logic dung 1 (bat) / 0 (tat) de tuong thich ca OpenCV FileStorage lan PyYAML.
+# =====================================================================
+
+model:
+  path: "outputs/checkpoints/best.onnx"     # Trong so do Thanh vien 3 ban giao
+  pt_path: "outputs/checkpoints/best.pt"    # Chi dung cho moc so sanh PyTorch
+  labels: "outputs/checkpoints/labels.txt"  # Moi dong 1 ten lop (sinh bang src/utils/export_labels.py)
+  input_width: 640
+  input_height: 640
+
+detection:
+  conf_threshold: 0.25    # Nguong loc o buoc giai ma (giu lai ung vien)
+  nms_threshold: 0.45     # Nguong IoU cua Non-Maximum Suppression
+  max_detections: 100
+
+backend:
+  engine: "opencv"        # opencv (cv::dnn) - mac dinh, chay duoc tren moi may
+  target: "cpu"           # cpu | cuda | cuda_fp16 (can OpenCV build voi CUDA)
+  num_threads: 0          # 0 = de OpenCV tu chon
+
+alert:
+  conf_threshold: 0.6     # Chi canh bao khi Confidence >= 0.6 (theo de cuong muc 2.2.3)
+  cooldown_ms: 1500       # Khong lap lai canh bao cung mot lop trong khoang nay
+  banner_ms: 1500         # Thoi gian hien thi banner canh bao tren man hinh
+
+source:
+  input: "data/raw/demo.mp4"   # Duong dan video, hoac chi so camera, vi du "0"
+  display: 1                   # 1 = hien cua so, 0 = chay an (headless)
+  output_video: ""             # De trong = khong ghi video
+
+benchmark:
+  warmup_frames: 20       # So khung hinh khoi dong, khong tinh vao ket qua
+  max_frames: 300         # So khung hinh do (video se tua lai neu ngan hon)
+  result_json: "outputs/logs/benchmark_cpp.json"
+  tag: "cpp-opencv-dnn"   # Nhan hien thi trong bang so sanh
